@@ -1,5 +1,7 @@
 package com.example.loginexample.user;
 
+import com.example.loginexample.board.BoardService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class UserController {
     private final UserService userService;
+    private final HttpSession session;
 
     @GetMapping("/join-form")
     public String joinForm() {
@@ -26,22 +29,32 @@ public class UserController {
     }
 
     @PostMapping("/join")
-    public String join() {
+    public String join(UserRequest.JoinDTO joinDTO) {
+        userService.회원가입(joinDTO);
         return "redirect:/login-form";
     }
 
     @PostMapping("/login")
-    public String login() {
+    public String login(UserRequest.LoginDTO loginDTO) {
+        User sessionUser = userService.로그인(loginDTO);
+        session.setAttribute("sessionUser", sessionUser);
         return "redirect:/";
     }
 
     @PostMapping("/user/update")
-    public String update() {
+    public String update(UserRequest.UpdateDTO updateDTO) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        // update user_tb set password = ?, email = ? where id = ?
+        User userPS = userService.회원정보수정(updateDTO, sessionUser.getId());
+        // 세션 동기화
+        session.setAttribute("sessionUser", userPS);
+
         return "redirect:/";
     }
 
     @GetMapping("/logout")
     public String logout() {
+        session.invalidate();
         return "redirect:/";
     }
 }
