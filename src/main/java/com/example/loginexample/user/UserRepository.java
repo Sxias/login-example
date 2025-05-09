@@ -12,7 +12,7 @@ public class UserRepository {
     private final EntityManager em;
 
     public void save(String username, String password, String email) {
-        Query q = em.createNativeQuery("insert into user_tb (username, password, email) values (?, ?, ?)");
+        Query q = em.createNativeQuery("insert into user_tb (username, password, email, created_at) values (?, ?, ?, now())");
         q.setParameter(1, username);
         q.setParameter(2, password);
         q.setParameter(3, email);
